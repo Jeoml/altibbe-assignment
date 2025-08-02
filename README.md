@@ -14,7 +14,7 @@ This project is a full-stack implementation of a **product transparency and AI-p
 |----------------|--------------------------------------------------------------------------|
 | 🌐 Frontend     | [frontend-altibbe.vercel.app](https://frontend-altibbe.vercel.app/)       |
 | 🔗 Backend API  | [altibbe-backend-production.up.railway.app/docs](https://altibbe-backend-production.up.railway.app/docs) |
-| 🤖 AI Service   | [fbc41cc5185c.ngrok-free.app/docs](https://fbc41cc5185c.ngrok-free.app/docs) *(temporary endpoint)* |
+| 🤖 AI Service   |[ [fbc41cc5185c.ngrok-free.app/docs](https://fbc41cc5185c.ngrok-free.app/docs)](https://7a7d00f9b3df.ngrok-free.app/docs) *(temporary endpoint)* |
 
 > Note: AI service is tunneled via **Ngrok** due to quota exhaustion on deployment services.
 
