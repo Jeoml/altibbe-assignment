@@ -2,7 +2,7 @@
 
 This is a full-stack implementation of a **product transparency and AI-powered assessment system**. It allows companies to register their products, respond to dynamically generated questions, and receive scores based on AI evaluations. 
 
-> ⚠️ **Note**: As of **August 3rd, 1:05 AM IST**, the AI service was migrated from Ngrok to an **AWS EC2 instance** for improved stability and performance.
+> ⚠️ **Note**: As of **August 3rd, 1:05 AM IST**, the AI service was migrated from my laptop to an **AWS EC2 instance** for improved stability and performance.
 
 ---
 
