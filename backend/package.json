@@ -33,6 +33,7 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@railway/cli": "^4.6.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.1.0",
