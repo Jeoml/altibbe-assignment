@@ -1,10 +1,8 @@
-# 🧠 Altibbe Assignment — Product Assessment Platform (Full Stack)
+# 🧠 Altibbe Assignment — Product Assessment Platform (AI Service Now on AWS EC2)
 
-This project is a full-stack implementation of a **product transparency and AI-powered assessment system**. It enables companies to register their products, answer detailed questions about them, and receive scores based on AI-driven evaluations. Built with a modular, scalable architecture across three services:
+This is a full-stack implementation of a **product transparency and AI-powered assessment system**. It allows companies to register their products, respond to dynamically generated questions, and receive scores based on AI evaluations. 
 
-- **Frontend** (Next.js + Tailwind)
-- **Backend API** (FastAPI + PostgreSQL)
-- **AI Assessment Service** (LLM-based scoring and analysis)
+> ⚠️ **Note**: As of **August 3rd, 1:05 AM IST**, the AI service was migrated from Ngrok to an **AWS EC2 instance** for improved stability and performance.
 
 ---
 
@@ -14,17 +12,17 @@ This project is a full-stack implementation of a **product transparency and AI-p
 |----------------|--------------------------------------------------------------------------|
 | 🌐 Frontend     | [frontend-altibbe.vercel.app](https://frontend-altibbe.vercel.app/)       |
 | 🔗 Backend API  | [altibbe-backend-production.up.railway.app/docs](https://altibbe-backend-production.up.railway.app/docs) |
-| 🤖 AI Service   |[ [fbc41cc5185c.ngrok-free.app/docs](https://fbc41cc5185c.ngrok-free.app/docs)](https://7a7d00f9b3df.ngrok-free.app/docs) *(temporary endpoint)* |
+| 🤖 AI Service   | [New AI Service on EC2 (FastAPI Docs)](https://<your-ec2-public-ip>.ngrok-free.app/docs) *(Live as of Aug 3, 1:05 AM)* |
 
-> Note: AI service is tunneled via **Ngrok** due to quota exhaustion on deployment services.
+---
 
 ## 💡 Features
 
-- 🔐 **Secure User and Product Registration**
-- 🧾 **Dynamic Question & Answer Flow per Product**
-- ⚖️ **AI-Powered Evaluation with Real-time Scoring**
-- 🌍 **Frontend Hosted via Vercel, Backend on Railway**
-- 🧠 **Pluggable AI Service via Ngrok Tunnel**
+- 🔐 **Secure Company & Product Registration**
+- ❓ **Dynamic Product Q&A Flow**
+- 🧠 **AI-Powered Scoring System**
+- 📊 **Assessment Progress Tracking**
+- 🌐 **Frontend on Vercel**, **Backend on Railway**, **AI Service on EC2**
 
 ---
 
@@ -36,7 +34,7 @@ This project is a full-stack implementation of a **product transparency and AI-p
 | Backend    | FastAPI, SQLAlchemy, PostgreSQL  |
 | AI Service | FastAPI, LangChain, OpenAI       |
 | Auth       | JWT, OAuth2 Password Flow        |
-| DevOps     | Railway, Vercel, Ngrok           |
+| DevOps     | Railway, Vercel, AWS EC2, Ngrok  |
 
 ---
 
