@@ -12,7 +12,7 @@ This is a full-stack implementation of a **product transparency and AI-powered a
 |----------------|--------------------------------------------------------------------------|
 | 🌐 Frontend     | [frontend-altibbe.vercel.app](https://frontend-altibbe.vercel.app/)       |
 | 🔗 Backend API  | [altibbe-backend-production.up.railway.app/docs](https://altibbe-backend-production.up.railway.app/docs) |
-| 🤖 AI Service   | [https://<your-ec2-public-ip>.ngrok-free.app/docs](https://d5c1f49002c8.ngrok-free.app/docs) *(Live as of Aug 3, 1:21 AM)* |
+| 🤖 AI Service   | [https://e54319acda10.ngrok-free.app]
 
 ---
 
