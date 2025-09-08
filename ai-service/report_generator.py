@@ -101,7 +101,7 @@ class HtmlReportGenerator:
         
         try:
             completion = groq_client.chat.completions.create(
-                model="llama-3.1-70b-versatile",
+                model="qwen/qwen3-32b",
                 messages=[{"role": "user", "content": report_generation_prompt}],
                 temperature=0.1,  # Very low temperature for consistent output
                 max_tokens=8000  # Increased for comprehensive report

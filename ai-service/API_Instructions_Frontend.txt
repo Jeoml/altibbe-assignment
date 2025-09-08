@@ -1,0 +1,255 @@
+# Product Transparency Assessment API - Frontend Instructions
+
+## Base URL
+https://altibbe-assignment-production.up.railway.app
+
+## Authentication
+Most endpoints require Bearer token. Get token from login endpoint.
+
+---
+
+## 1. AUTHENTICATION
+
+### Login
+**POST /api/auth/login**
+```javascript
+const response = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'username=test_user&password=test_password'
+});
+const { access_token } = await response.json();
+```
+
+---
+
+## 2. PRODUCT MANAGEMENT
+
+### Register Product
+**POST /api/products/register**
+```javascript
+const productData = {
+    company_name: "Your Company",
+    product_name: "Your Product",
+    product_id: "UNIQUE-ID-001",
+    description: "Product description",
+    domain: "Technology"
+};
+
+const response = await fetch('/api/products/register', {
+    method: 'POST',
+    headers: {
+        'Authorization': `Bearer ${access_token}`,
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(productData)
+});
+const result = await response.json();
+const sessionId = result.session_id; // Use this for assessment
+```
+
+### Get Session by Product ID
+**GET /api/products/{product_id}/session**
+```javascript
+const response = await fetch(`/api/products/${productId}/session`, {
+    headers: { 'Authorization': `Bearer ${access_token}` }
+});
+const sessionData = await response.json();
+```
+
+---
+
+## 3. ASSESSMENT
+
+### Submit Response
+**POST /api/assessment/respond**
+```javascript
+const responseData = {
+    session_id: sessionId,
+    message: "Your response to the question",
+    context: { user_role: "customer", language: "en", platform: "web" }
+};
+
+const response = await fetch('/api/assessment/respond', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(responseData)
+});
+const result = await response.json();
+
+if (result.is_complete) {
+    console.log(`Final score: ${result.final_score}`);
+} else {
+    console.log(`Next question: ${result.remaining_questions[0]}`);
+}
+```
+
+### Get Assessment Status
+**GET /api/assessment/{session_id}/status**
+```javascript
+const response = await fetch(`/api/assessment/${sessionId}/status`, {
+    headers: { 'Authorization': `Bearer ${access_token}` }
+});
+const status = await response.json();
+```
+
+### Get Assessment Report
+**GET /api/assessment/{session_id}/report**
+```javascript
+const response = await fetch(`/api/assessment/${sessionId}/report`);
+const report = await response.json();
+// Use report.latex_report for HTML display
+```
+
+---
+
+## 4. SYSTEM
+
+### Health Check
+**GET /health**
+```javascript
+const response = await fetch('/health');
+const health = await response.json();
+```
+
+---
+
+## 5. COMPLETE WORKFLOW
+
+```javascript
+class TransparencyAPI {
+    constructor() {
+        this.baseURL = 'https://altibbe-assignment-production.up.railway.app';
+        this.token = null;
+    }
+
+    async login() {
+        const response = await fetch(`${this.baseURL}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'username=test_user&password=test_password'
+        });
+        const data = await response.json();
+        this.token = data.access_token;
+    }
+
+    async registerProduct(productData) {
+        const response = await fetch(`${this.baseURL}/api/products/register`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(productData)
+        });
+        return await response.json();
+    }
+
+    async submitResponse(sessionId, message) {
+        const response = await fetch(`${this.baseURL}/api/assessment/respond`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                session_id: sessionId,
+                message: message,
+                context: { user_role: "customer", language: "en", platform: "web" }
+            })
+        });
+        return await response.json();
+    }
+
+    async getReport(sessionId) {
+        const response = await fetch(`${this.baseURL}/api/assessment/${sessionId}/report`);
+        return await response.json();
+    }
+}
+
+// Usage
+async function runAssessment() {
+    const api = new TransparencyAPI();
+    
+    // 1. Login
+    await api.login();
+    
+    // 2. Register Product
+    const productData = {
+        company_name: "Demo Company",
+        product_name: "Demo Product",
+        product_id: `DEMO-${Date.now()}`,
+        description: "A demonstration product",
+        domain: "Technology"
+    };
+    const registration = await api.registerProduct(productData);
+    const sessionId = registration.session_id;
+    
+    // 3. Submit Responses (6 questions)
+    const responses = [
+        "Our product contains natural ingredients...",
+        "We have ISO 9001 certification...",
+        "Our product has a 2-year shelf life...",
+        "We follow sustainable practices...",
+        "We have a comprehensive tracking system...",
+        "We comply with all privacy regulations..."
+    ];
+    
+    for (const response of responses) {
+        const result = await api.submitResponse(sessionId, response);
+        if (result.is_complete) {
+            console.log(`Assessment complete! Final score: ${result.final_score}`);
+            break;
+        }
+    }
+    
+    // 4. Get Report
+    const report = await api.getReport(sessionId);
+    console.log('Report generated:', report.final_score);
+}
+```
+
+---
+
+## 6. ASSESSMENT QUESTIONS
+
+1. "Please provide detailed information about all ingredients/components used in your product. Are there any potentially harmful substances that consumers should be aware of?"
+
+2. "What quality control measures and testing procedures do you implement during manufacturing? Please share your quality certifications and compliance standards."
+
+3. "Are there any known side effects, risks, or contraindications associated with your product? How do you communicate these to consumers?"
+
+4. "Please describe your product's environmental impact and disposal methods. What sustainable practices do you follow in production?"
+
+5. "What is your product's shelf life, storage requirements, and proper usage instructions? How do you ensure consumers receive accurate information?"
+
+6. "Do you have a system for tracking adverse events, consumer complaints, and product recalls? How transparent are you about product issues and their resolution?"
+
+---
+
+## 7. ERROR HANDLING
+
+- 200: Success
+- 400: Bad Request
+- 401: Unauthorized
+- 404: Not Found
+- 422: Validation Error
+- 500: Server Error
+
+Error format:
+```json
+{ "detail": "Error message" }
+```
+
+---
+
+## 8. NOTES
+
+- Token expires after 30 minutes
+- CORS enabled for all origins
+- Session ID is extracted from database
+- Each response scored 0-100
+- Final score is average of all scores
+- HTML report available in latex_report field
+
+---
+
+**API Version:** 1.0.0
+**Last Updated:** 2025-09-08
