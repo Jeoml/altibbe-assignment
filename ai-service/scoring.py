@@ -14,108 +14,104 @@ class TransparencyScorer:
         """Score response based on transparency criteria"""
         
         scoring_prompt = f"""
-        As an expert in Indian consumer safety regulations with deep knowledge of BIS standards, FSSAI guidelines, Consumer Protection Act 2019, Drug Controller regulations, and industry best practices, conduct a thorough analytical evaluation of this transparency response.
+        As a CRITICAL EVALUATOR of corporate transparency with expertise in Indian consumer safety regulations, conduct a RIGOROUS, UNFORGIVING assessment of this response. Apply EXTREME SCRUTINY - most responses should score 2-3 marks out of 10.
 
         Question {question_number}: {question}
         Response: {response}
 
-        ANALYTICAL FRAMEWORK - Reason through each element systematically:
+        CRITICAL EVALUATION FRAMEWORK - Apply HARSH STANDARDS:
 
-        1. COMPLETENESS OF INFORMATION (30 points) - Deep Analysis Required:
+        1. EVIDENCE QUALITY & VERIFICATION (3 points) - ZERO TOLERANCE FOR WEAK EVIDENCE:
            
-           a) COMPREHENSIVENESS ASSESSMENT:
-              - Analyze if EVERY component of the question is addressed
-              - Evaluate depth vs breadth of information provided
-              - Check for any missing critical elements that consumers need
-              - Assess if technical details are sufficiently detailed
+           a) DOCUMENTARY PROOF REQUIREMENT (1 point):
+              - ONLY award if response provides SPECIFIC, VERIFIABLE documentation
+              - Certificate numbers, license IDs, test report references MUST be included
+              - Generic statements like "we are certified" = 0 points
+              - Missing verifiable evidence = AUTOMATIC 0
            
-           b) QUANTITATIVE DATA EVALUATION:
-              - Examine specificity of numbers, percentages, concentrations
-              - Verify if measurement units are provided
-              - Check if ranges or exact values are given where appropriate
-              - Assess statistical significance of any claims made
+           b) THIRD-PARTY VERIFICATION (1 point):
+              - ONLY award if response mentions INDEPENDENT verification bodies
+              - Must specify WHO verified, WHEN, and WHAT standards
+              - Self-claims without external validation = 0 points
+              - Vague references to "authorities" = 0 points
            
-           c) REGULATORY DOCUMENTATION ANALYSIS:
-              - Identify specific certifications mentioned (ISO numbers, BIS codes, FSSAI license numbers)
-              - Evaluate validity and relevance of cited standards
-              - Check if regulatory compliance is evidenced with documentation
-              - Assess currency and authenticity of regulatory references
+           c) DATA SPECIFICITY & ACCURACY (1 point):
+              - ONLY award if response provides EXACT numbers, dates, concentrations
+              - Ranges without specific values = 0 points
+              - Round numbers without precision = 0 points
+              - Any contradictory or inconsistent data = 0 points
 
-        2. HONESTY AND TRANSPARENCY (25 points) - Behavioral Analysis Required:
+        2. TRANSPARENCY DEPTH & HONESTY (3 points) - DEMAND COMPLETE CANDOR:
            
-           a) LIMITATION ACKNOWLEDGMENT ASSESSMENT:
-              - Analyze whether response admits knowledge gaps or uncertainties
-              - Evaluate if caveats are provided where appropriate
-              - Check for honest disclosure of product limitations
-              - Assess balance between confidence and humility in claims
+           a) LIMITATION ACKNOWLEDGMENT (1 point):
+              - ONLY award if response explicitly states what they DON'T know
+              - Must admit specific knowledge gaps or uncertainties
+              - Overconfident claims without caveats = 0 points
+              - Marketing language without honest limitations = 0 points
            
-           b) RISK DISCLOSURE EVALUATION:
-              - Examine completeness of negative aspect disclosure
-              - Analyze severity and probability of disclosed risks
-              - Check if risk mitigation strategies are provided
-              - Evaluate comparative risk assessment with alternatives
+           b) NEGATIVE ASPECT DISCLOSURE (1 point):
+              - ONLY award if response discusses downsides, risks, or failures
+              - Must provide specific examples of problems or limitations
+              - Only positive information = 0 points
+              - Downplaying or hiding negative aspects = 0 points
            
-           c) COMMUNICATION TONE ANALYSIS:
-              - Distinguish between factual reporting vs marketing language
-              - Analyze use of qualifiers vs absolute statements
-              - Check for evidence-based claims vs promotional assertions
-              - Evaluate objectivity in presenting information
+           c) COMPARATIVE HONESTY (1 point):
+              - ONLY award if response compares honestly with competitors/alternatives
+              - Must acknowledge where others might be better
+              - Only self-promotional content = 0 points
+              - Unfair competitive comparisons = 0 points
 
-        3. COMPLIANCE WITH INDIAN CONSUMER SAFETY GUIDELINES (25 points) - Regulatory Analysis Required:
+        3. REGULATORY COMPLIANCE & LEGAL PRECISION (2 points) - DEMAND EXACT COMPLIANCE:
            
-           a) SPECIFIC REGULATION CITATION ANALYSIS:
-              - Identify exact regulatory frameworks mentioned (BIS Act 2016, FSSAI Act 2006, etc.)
-              - Evaluate accuracy of regulatory interpretations
-              - Check for industry-specific compliance requirements
-              - Assess understanding of mandatory vs voluntary standards
+           a) SPECIFIC REGULATION CITATION (1 point):
+              - ONLY award if response cites EXACT regulation numbers, sections, dates
+              - Must reference specific BIS standards, FSSAI guidelines, Act sections
+              - General mentions of "regulations" = 0 points
+              - Incorrect or outdated regulatory references = 0 points
            
-           b) CONSUMER PROTECTION ALIGNMENT:
-              - Analyze adherence to Consumer Protection Act 2019 disclosure requirements
-              - Evaluate right-to-information compliance
-              - Check for consumer grievance mechanism alignment
-              - Assess product liability law considerations
-           
-           c) ENFORCEMENT EVIDENCE EVALUATION:
-              - Examine proof of regulatory compliance (license numbers, certificates)
-              - Analyze third-party verification mentions
-              - Check for audit trail references
-              - Evaluate regulatory body interaction evidence
+           b) COMPLIANCE EVIDENCE (1 point):
+              - ONLY award if response provides PROOF of compliance
+              - Must show audit results, inspection reports, or enforcement actions
+              - Claims without evidence = 0 points
+              - Past compliance without current status = 0 points
 
-        4. CLARITY AND ACCESSIBILITY (20 points) - Communication Analysis Required:
+        4. RESPONSE METHODOLOGY & REASONING (2 points) - EVALUATE HOW THEY ANSWER:
            
-           a) LANGUAGE ACCESSIBILITY ASSESSMENT:
-              - Analyze technical jargon usage and explanations provided
-              - Evaluate sentence complexity and readability
-              - Check for multilingual considerations if relevant
-              - Assess cultural sensitivity in communication
+           a) LOGICAL STRUCTURE & REASONING (1 point):
+              - ONLY award if response follows clear logical progression
+              - Must show step-by-step reasoning with premises and conclusions
+              - Disorganized or illogical flow = 0 points
+              - Jumping to conclusions without reasoning = 0 points
            
-           b) ACTIONABILITY EVALUATION:
-              - Examine specific instructions provided to consumers
-              - Analyze step-by-step guidance clarity
-              - Check for decision-making support information
-              - Evaluate emergency response instructions if applicable
-           
-           c) SAFETY COMMUNICATION ANALYSIS:
-              - Assess prominence of critical safety information
-              - Analyze warning placement and visibility
-              - Check for risk severity communication effectiveness
-              - Evaluate precautionary measure clarity
+           b) CRITICAL ANALYSIS DEPTH (1 point):
+              - ONLY award if response demonstrates deep analytical thinking
+              - Must show consideration of multiple perspectives and implications
+              - Surface-level responses = 0 points
+              - No critical evaluation of own claims = 0 points
 
-        REASONING METHODOLOGY:
-        - Consider the specific domain context (food/pharma/electronics/cosmetics)
-        - Analyze response against question-specific expectations
-        - Evaluate information hierarchy and prioritization
-        - Consider consumer impact and decision-making utility
-        - Assess legal liability and regulatory risk implications
+        AUTOMATIC PENALTY SYSTEM - DEDUCT POINTS FOR:
+        - Marketing language or promotional content: -1 point
+        - Vague or non-specific statements: -1 point  
+        - Contradictory information: -1 point
+        - Missing critical safety information: -1 point
+        - Incomplete responses (less than 100 words): -1 point
+        - No actionable information for consumers: -1 point
 
-        SCORING CALIBRATION:
-        - 95-100: Exceptional transparency exceeding regulatory requirements with comprehensive reasoning
-        - 85-94: Strong transparency meeting all regulatory standards with good reasoning
-        - 75-84: Adequate transparency with basic regulatory compliance and some reasoning gaps
-        - 65-74: Minimal transparency with significant reasoning deficiencies
-        - Below 65: Inadequate transparency with poor reasoning and compliance failures
+        SCORING CALIBRATION - BE EXTREMELY STRICT:
+        - 8-10: EXCEPTIONAL (rare) - Perfect evidence, complete honesty, flawless compliance
+        - 6-7: GOOD (uncommon) - Strong evidence with minor gaps
+        - 4-5: ADEQUATE (occasional) - Basic compliance with significant limitations
+        - 2-3: POOR (typical) - Major gaps in evidence, honesty, or compliance
+        - 0-1: FAILURE (common) - Inadequate response with critical failures
 
-        After conducting this comprehensive analysis across all dimensions, provide only the final numerical score (1-100) that reflects the depth of reasoning demonstrated in the response.
+        CRITICAL EVALUATION RULES:
+        1. Start with 0 points and award ONLY for exceptional merit
+        2. Apply penalties liberally for any transparency failures
+        3. Most responses should score 2-3 due to typical corporate evasiveness
+        4. Only award high scores for truly exceptional transparency
+        5. Consider the response methodology - HOW they answer matters as much as WHAT they answer
+
+        After this rigorous analysis, provide ONLY the final numerical score (0-10) that reflects the harsh standards applied.
         """
         
         try:
@@ -128,8 +124,8 @@ class TransparencyScorer:
             
             score_text = completion.choices[0].message.content.strip()
             score = int(''.join(filter(str.isdigit, score_text)))
-            return max(1, min(100, score))  # Ensure score is between 1-100
+            return max(0, min(10, score))  # Ensure score is between 0-10
             
         except Exception as e:
             print(f"Error scoring response: {e}")
-            return 50  # Default moderate score on error
+            return 5  # Default moderate score on error (middle of 0-10 scale)
