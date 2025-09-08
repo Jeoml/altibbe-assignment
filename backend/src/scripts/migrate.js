@@ -87,16 +87,21 @@ const createTables = async () => {
   } catch (error) {
     console.error('❌ Migration error:', error);
   } finally {
-    // Use pool.pool.end() instead of pool.end() for the wrapped pool
-    if (pool.pool && typeof pool.pool.end === 'function') {
-      await pool.pool.end();
+    // Close the database connection pool
+    if (pool && typeof pool.end === 'function') {
+      await pool.end();
     }
   }
 };
 
 // Run migration
 if (require.main === module) {
-  createTables();
+  createTables().then(() => {
+    process.exit(0);
+  }).catch((error) => {
+    console.error('Migration failed:', error);
+    process.exit(1);
+  });
 }
 
 module.exports = { createTables };

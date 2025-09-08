@@ -3,7 +3,7 @@ const pool = require('../config/database');
 
 class Question {
   static async createBatch(productId, questions) {
-    const client = await pool.connect();
+    const client = await pool.getClient();
     
     try {
       await client.query('BEGIN');
@@ -37,8 +37,8 @@ class Question {
 
   static async findByProduct(productId) {
     const query = `
-      SELECT * FROM questions 
-      WHERE product_id = $1 
+      SELECT * FROM questions
+      WHERE product_id = $1
       ORDER BY question_order ASC
     `;
     const result = await pool.query(query, [productId]);

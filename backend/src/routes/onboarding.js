@@ -207,7 +207,7 @@ router.post('/start', authenticateToken, validateInitialData, asyncHandler(async
       producer_id: session.producer_id,
       status: session.status,
       message: session.message,
-      collected_fields: JSON.parse(session.collected_fields),
+      collected_fields: session.collected_fields, // Already parsed from JSONB
       current_field: session.current_field
     };
 
@@ -295,7 +295,7 @@ router.get('/:session_id', authenticateToken, asyncHandler(async (req, res) => {
     producer_id: session.producer_id,
     status: session.status,
     message: session.message,
-    collected_fields: JSON.parse(session.collected_fields),
+    collected_fields: session.collected_fields, // Already parsed from JSONB
     current_field: session.current_field
   };
 
@@ -303,3 +303,5 @@ router.get('/:session_id', authenticateToken, asyncHandler(async (req, res) => {
 }));
 
 module.exports = router;
+
+

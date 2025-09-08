@@ -52,8 +52,9 @@ app.use(cors({
       'http://localhost:3001',
       'https://localhost:3001',
       `http://localhost:${PORT}`, // Allow Swagger UI origin
-      'http://localhost:5000',     // Explicit port 5000 for Swagger
-      'http://localhost:5002'      // Alternative port
+      'https://frontend-altibbe.vercel.app',
+      'http://localhost:5002',     // Alternative port
+      'https://altibbe-assignment-production-07f7.up.railway.app' // Railway frontend URL
     ].filter(Boolean);
     
     // Allow requests with no origin (mobile apps, Postman, etc.)
