@@ -1,0 +1,14 @@
+NODE_ENV=production
+PORT=5002
+FRONTEND_URL=https://frontend-altibbe.vercel.app
+DATABASE_URL=postgresql://neondb_owner:npg_6JRCXUliz9qm@ep-winter-bonus-adazck1w-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+DB_HOST=ep-winter-bonus-adazck1w-pooler.c-2.us-east-1.aws.neon.tech
+DB_PORT=5432
+DB_NAME=neondb
+DB_USER=neondb_owner
+DB_PASSWORD=npg_6JRCXUliz9qm
+JWT_SECRET=iweufgwebirykgeuehifeygf
+JWT_REFRESH_SECRET=different_super_long_refresh_secret
+AI_SERVICE_URL=https://altibbe-assignment-production-07f7.up.railway.app
+RAILWAY_PROJECT_ID=altibbe-assignment-production-07f7
+RAILWAY_STATIC_URL=https://altibbe-assignment-production-07f7.up.railway.app
