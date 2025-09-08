@@ -101,7 +101,7 @@ class HtmlReportGenerator:
         
         try:
             completion = groq_client.chat.completions.create(
-                model="qwen/qwen3-32b",
+                model="llama-3.1-70b-versatile",
                 messages=[{"role": "user", "content": report_generation_prompt}],
                 temperature=0.1,  # Very low temperature for consistent output
                 max_tokens=8000  # Increased for comprehensive report
@@ -131,15 +131,40 @@ class HtmlReportGenerator:
             
         except Exception as e:
             print(f"Error generating HTML report: {e}")
+            error_message = str(e)
+
+            # Provide more specific error messages
+            if "api key" in error_message.lower():
+                error_message = "API key configuration error. Please check your Groq API key."
+            elif "model" in error_message.lower():
+                error_message = "Invalid model specified. Please check the model configuration."
+            elif "rate limit" in error_message.lower():
+                error_message = "API rate limit exceeded. Please try again later."
+            elif "timeout" in error_message.lower():
+                error_message = "Request timed out. Please try again."
+            else:
+                error_message = f"Unable to generate transparency report: {error_message}"
+
             # Return error message instead of incomplete template
             return f"""<!DOCTYPE html>
 <html>
 <head>
     <title>Report Generation Error</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 40px; background-color: #f5f5f5; }}
+        .error-container {{ background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; }}
+        .error-title {{ color: #d32f2f; margin-bottom: 20px; }}
+        .error-message {{ color: #666; line-height: 1.6; }}
+        .retry-btn {{ background: #1976d2; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; }}
+        .retry-btn:hover {{ background: #1565c0; }}
+    </style>
 </head>
 <body>
-    <h1>Error Generating Report</h1>
-    <p>Unable to generate transparency report: {str(e)}</p>
-    <p>Please try again or contact support.</p>
+    <div class="error-container">
+        <h1 class="error-title">Report Generation Error</h1>
+        <p class="error-message">{error_message}</p>
+        <p class="error-message">Please try again or contact support if the problem persists.</p>
+        <button class="retry-btn" onclick="window.location.reload()">Retry</button>
+    </div>
 </body>
 </html>"""

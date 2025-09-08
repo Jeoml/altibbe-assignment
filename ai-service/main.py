@@ -139,65 +139,86 @@ async def get_assessment_report(
     db: Session = Depends(get_db)
 ):
     """Get detailed assessment report with LaTeX summary"""
-    session = db.query(AssessmentSession).filter(
-        AssessmentSession.session_id == session_id
-    ).first()
-    
-    if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
-    
-    # Get product information
-    product = db.query(Product).filter(
-        Product.product_id == session.product_id
-    ).first()
-    
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    
-    responses = json.loads(session.responses or "[]")
-    scores = json.loads(session.scores or "[]")
-    
-    # Prepare product data for LaTeX generation
-    product_data = {
-        "company_name": product.company_name,
-        "product_name": product.product_name,
-        "product_id": product.product_id,
-        "description": product.description,
-        "domain": product.domain
-    }
-    
-    session_data = {
-        "session_id": session_id,
-        "status": session.status,
-        "created_at": session.created_at,
-        "updated_at": session.updated_at,
-        "current_question": session.current_question
-    }
-    
-    # Generate LaTeX report using LLM
     try:
-        latex_report = HtmlReportGenerator.generate_transparency_report(
-            product_data=product_data,
-            session_data=session_data,
-            responses=responses,
-            scores=scores,
-            final_score=session.final_score or 0.0
-        )
+        session = db.query(AssessmentSession).filter(
+            AssessmentSession.session_id == session_id
+        ).first()
+        
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Get product information
+        product = db.query(Product).filter(
+            Product.product_id == session.product_id
+        ).first()
+        
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+        
+        # Parse JSON data safely
+        try:
+            responses = json.loads(session.responses or "[]")
+            scores = json.loads(session.scores or "[]")
+        except json.JSONDecodeError as e:
+            print(f"JSON parsing error: {e}")
+            responses = []
+            scores = []
+        
+        # Prepare product data for LaTeX generation
+        product_data = {
+            "company_name": product.company_name,
+            "product_name": product.product_name,
+            "product_id": product.product_id,
+            "description": product.description,
+            "domain": product.domain
+        }
+        
+        session_data = {
+            "session_id": session_id,
+            "status": session.status,
+            "created_at": session.created_at,
+            "updated_at": session.updated_at,
+            "current_question": session.current_question
+        }
+        
+        # Generate LaTeX report using LLM
+        try:
+            latex_report = HtmlReportGenerator.generate_transparency_report(
+                product_data=product_data,
+                session_data=session_data,
+                responses=responses,
+                scores=scores,
+                final_score=session.final_score or 0.0
+            )
+        except Exception as e:
+            print(f"Error generating LaTeX report: {e}")
+            # Return error message in the report instead of failing the entire request
+            latex_report = f"Error generating LaTeX report: {str(e)}"
+        
+        return {
+            "session_id": session_id,
+            "product_id": session.product_id,
+            "status": session.status,
+            "final_score": session.final_score,
+            "detailed_responses": responses,
+            "scores": scores,
+            "created_at": session.created_at,
+            "completed_at": session.updated_at if session.status == "completed" else None,
+            "latex_report": latex_report  # New field with LaTeX transparency report
+        }
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions (like 404)
+        raise
     except Exception as e:
-        print(f"Error generating LaTeX report: {e}")
-        latex_report = "Error generating LaTeX report. Please try again later."
-    
-    return {
-        "session_id": session_id,
-        "product_id": session.product_id,
-        "status": session.status,
-        "final_score": session.final_score,
-        "detailed_responses": responses,
-        "scores": scores,
-        "created_at": session.created_at,
-        "completed_at": session.updated_at if session.status == "completed" else None,
-        "latex_report": latex_report  # New field with LaTeX transparency report
-    }
+        # Catch any other unexpected errors and return 500
+        print(f"Unexpected error in get_assessment_report: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Internal server error: {str(e)}"
+        )
 
 @app.get("/health")
 async def health_check():
