@@ -31,3 +31,7 @@ class AssessmentResult(BaseModel):
     final_score: Optional[float] = None
     remaining_questions: Optional[List[str]] = None
     all_scores: Optional[List[int]] = None
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str

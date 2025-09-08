@@ -4,18 +4,19 @@ FastAPI main application and API endpoints
 
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Form, status
+from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from config import TRANSPARENCY_QUESTIONS
 from database import get_db, Product, AssessmentSession
-from schemas import ProductCreate, QuestionResponse, AssessmentResult
+from schemas import ProductCreate, QuestionResponse, AssessmentResult, Token
 from services import register_product, process_response
-from auth import verify_token
+from auth import verify_token, create_access_token
 from report_generator import HtmlReportGenerator
 
 # FastAPI App
@@ -31,6 +32,26 @@ app.add_middleware(
 )
 
 # API Endpoints
+@app.post("/api/auth/login", response_model=Token)
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    """Login endpoint to get JWT access token"""
+    # For demo purposes, accept any username/password combination
+    # In production, you would verify against a user database
+    if not form_data.username or not form_data.password:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Create access token
+    access_token_expires = timedelta(minutes=30)
+    access_token = create_access_token(
+        data={"sub": form_data.username}, expires_delta=access_token_expires
+    )
+    
+    return {"access_token": access_token, "token_type": "bearer"}
+
 @app.post("/api/products/register")
 async def register_product_endpoint(
     product: ProductCreate,
@@ -75,7 +96,6 @@ async def register_product_endpoint(
 @app.post("/api/assessment/respond", response_model=AssessmentResult)
 async def submit_response(
     response: QuestionResponse,
-    token: str = Depends(verify_token),
     db: Session = Depends(get_db)
 ):
     """Submit response to current question and get remaining questions"""
@@ -135,7 +155,6 @@ async def get_assessment_status(
 @app.get("/api/assessment/{session_id}/report")
 async def get_assessment_report(
     session_id: str,
-    token: str = Depends(verify_token),
     db: Session = Depends(get_db)
 ):
     """Get detailed assessment report with LaTeX summary"""

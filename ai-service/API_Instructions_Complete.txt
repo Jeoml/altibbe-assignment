@@ -1,0 +1,435 @@
+PRODUCT TRANSPARENCY ASSESSMENT API - COMPLETE DOCUMENTATION
+============================================================
+
+BASE URL: https://altibbe-assignment-production.up.railway.app
+
+OVERVIEW:
+This API provides a comprehensive product transparency assessment system based on Indian consumer safety guidelines. It evaluates products across 6 key transparency dimensions and generates detailed HTML reports.
+
+AUTHENTICATION:
+- Most API endpoints require JWT Bearer token authentication
+- Assessment endpoints (/api/assessment/respond and /api/assessment/{session_id}/report) do NOT require authentication
+- For other endpoints, first get a JWT token using the login endpoint
+- JWT tokens expire after 30 minutes
+
+=====================================
+API ENDPOINT 1: LOGIN (GET JWT TOKEN)
+=====================================
+
+ENDPOINT: POST /api/auth/login
+
+PURPOSE: Get JWT access token for authentication.
+
+HEADERS REQUIRED:
+- Content-Type: application/x-www-form-urlencoded
+- Accept: application/json
+
+REQUEST BODY (Form Data):
+- username: string (any username works for demo)
+- password: string (any password works for demo)
+
+SUCCESSFUL RESPONSE (200):
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer"
+}
+
+ERROR RESPONSES:
+- 401: Incorrect username or password
+
+CURL EXAMPLE:
+curl -X 'POST' \
+  'https://altibbe-assignment-production.up.railway.app/api/auth/login' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'username=testuser&password=testpass'
+
+=====================================
+API ENDPOINT 2: REGISTER PRODUCT
+=====================================
+
+ENDPOINT: POST /api/products/register
+
+PURPOSE: Register a new product for transparency assessment and start assessment session.
+
+HEADERS REQUIRED:
+- Content-Type: application/json
+- Authorization: Bearer <jwt_token_from_login>
+- Accept: application/json
+
+REQUEST BODY SCHEMA:
+{
+  "company_name": "string (required)",
+  "product_name": "string (required)", 
+  "product_id": "string (required, unique)",
+  "description": "string (required)",
+  "domain": "string (required)"
+}
+
+REQUEST BODY EXAMPLE:
+{
+  "company_name": "TechCorp India",
+  "product_name": "HealthPlus Supplements",
+  "product_id": "HP-001",
+  "description": "Premium multivitamin supplements for adults",
+  "domain": "healthcare"
+}
+
+SUCCESSFUL RESPONSE (200):
+{
+  "status": "success",
+  "session_id": "uuid-string",
+  "product_id": "HP-001",
+  "first_question": "Please provide detailed information about all ingredients/components...",
+  "remaining_questions": ["question2", "question3", "question4", "question5", "question6"],
+  "message": "Product registered. Assessment started."
+}
+
+ERROR RESPONSES:
+- 401: Not authenticated (missing or invalid JWT token)
+- 400: Bad Request (product_id already exists or validation error)
+- 422: Validation Error (invalid request body format)
+
+CURL EXAMPLE:
+# First get JWT token
+JWT_TOKEN=$(curl -X 'POST' \
+  'https://altibbe-assignment-production.up.railway.app/api/auth/login' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'username=testuser&password=testpass' | jq -r '.access_token')
+
+# Register product
+curl -X 'POST' \
+  'https://altibbe-assignment-production.up.railway.app/api/products/register' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -d '{
+  "company_name": "TechCorp India",
+  "product_name": "HealthPlus Supplements", 
+  "product_id": "HP-001",
+  "description": "Premium multivitamin supplements for adults",
+  "domain": "healthcare"
+}'
+
+=====================================
+API ENDPOINT 3: SUBMIT ASSESSMENT RESPONSE
+=====================================
+
+ENDPOINT: POST /api/assessment/respond
+
+PURPOSE: Submit a response to the current assessment question and get the next question or completion status.
+
+HEADERS REQUIRED:
+- Content-Type: application/json
+- Accept: application/json
+- NOTE: No authentication required for this endpoint
+
+REQUEST BODY SCHEMA:
+{
+  "session_id": "string (required)",
+  "message": "string (required)",
+  "context": {
+    "user_role": "string (optional)",
+    "language": "string (optional)", 
+    "platform": "string (optional)"
+  }
+}
+
+REQUEST BODY EXAMPLE:
+{
+  "session_id": "4a031c95-77a5-41e2-b913-a24885b80f91",
+  "message": "Our product contains 15 essential vitamins and minerals including Vitamin D3, B12, Iron, and Zinc. All ingredients are sourced from certified suppliers and tested for purity. We provide detailed ingredient lists on our packaging and website.",
+  "context": {
+    "user_role": "customer",
+    "language": "en",
+    "platform": "web"
+  }
+}
+
+SUCCESSFUL RESPONSE (200):
+{
+  "answer": "string (AI's response to user message)",
+  "score": 8,
+  "question_number": 1,
+  "session_id": "4a031c95-77a5-41e2-b913-a24885b80f91",
+  "is_complete": false,
+  "final_score": null,
+  "remaining_questions": ["question2", "question3", "question4", "question5", "question6"],
+  "all_scores": [8]
+}
+
+COMPLETION RESPONSE (200):
+{
+  "answer": "string (AI's response to user message)",
+  "score": 7,
+  "question_number": 6,
+  "session_id": "4a031c95-77a5-41e2-b913-a24885b80f91",
+  "is_complete": true,
+  "final_score": 7.5,
+  "remaining_questions": null,
+  "all_scores": [8, 7, 9, 6, 8, 7]
+}
+
+ERROR RESPONSES:
+- 400: Bad Request (session not found or processing error)
+- 422: Validation Error (invalid request body format)
+
+CURL EXAMPLE:
+curl -X 'POST' \
+  'https://altibbe-assignment-production.up.railway.app/api/assessment/respond' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "session_id": "4a031c95-77a5-41e2-b913-a24885b80f91",
+  "message": "Our product contains 15 essential vitamins and minerals including Vitamin D3, B12, Iron, and Zinc. All ingredients are sourced from certified suppliers and tested for purity.",
+  "context": {
+    "user_role": "customer",
+    "language": "en",
+    "platform": "web"
+  }
+}'
+
+=====================================
+API ENDPOINT 4: GET ASSESSMENT STATUS
+=====================================
+
+ENDPOINT: GET /api/assessment/{session_id}/status
+
+PURPOSE: Get current assessment status and progress information.
+
+HEADERS REQUIRED:
+- Authorization: Bearer <jwt_token_from_login>
+- Accept: application/json
+
+PATH PARAMETERS:
+- session_id (required): The assessment session ID
+
+SUCCESSFUL RESPONSE (200):
+{
+  "session_id": "4a031c95-77a5-41e2-b913-a24885b80f91",
+  "current_question": 3,
+  "status": "active",
+  "final_score": null,
+  "responses_count": 2,
+  "next_question": "Are there any known side effects, risks, or contraindications associated with your product? How do you communicate these to consumers?"
+}
+
+ERROR RESPONSES:
+- 401: Not authenticated (missing or invalid JWT token)
+- 404: Session not found
+- 422: Validation Error (invalid session_id format)
+
+CURL EXAMPLE:
+# First get JWT token
+JWT_TOKEN=$(curl -X 'POST' \
+  'https://altibbe-assignment-production.up.railway.app/api/auth/login' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'username=testuser&password=testpass' | jq -r '.access_token')
+
+# Get status
+curl -X 'GET' \
+  'https://altibbe-assignment-production.up.railway.app/api/assessment/4a031c95-77a5-41e2-b913-a24885b80f91/status' \
+  -H 'accept: application/json' \
+  -H "Authorization: Bearer $JWT_TOKEN"
+
+=====================================
+API ENDPOINT 5: GET ASSESSMENT REPORT
+=====================================
+
+ENDPOINT: GET /api/assessment/{session_id}/report
+
+PURPOSE: Get detailed assessment report with HTML summary for a completed assessment session.
+
+HEADERS REQUIRED:
+- Accept: application/json
+- NOTE: No authentication required for this endpoint
+
+PATH PARAMETERS:
+- session_id (required): The assessment session ID
+
+SUCCESSFUL RESPONSE (200):
+{
+  "session_id": "4a031c95-77a5-41e2-b913-a24885b80f91",
+  "product_id": "HP-001",
+  "status": "completed",
+  "final_score": 7.5,
+  "detailed_responses": [
+    {
+      "question_number": 1,
+      "question": "Please provide detailed information about all ingredients/components...",
+      "response": "Our product contains 15 essential vitamins...",
+      "timestamp": "2025-09-08T19:52:31.036671"
+    }
+  ],
+  "scores": [8, 7, 9, 6, 8, 7],
+  "created_at": "2025-09-08T19:52:31.036671",
+  "completed_at": "2025-09-08T20:15:42.123456",
+  "latex_report": "<!DOCTYPE html><html>...</html>"
+}
+
+ERROR RESPONSES:
+- 404: Session not found
+- 422: Validation Error (invalid session_id format)
+- 500: Internal server error
+
+CURL EXAMPLE:
+curl -X 'GET' \
+  'https://altibbe-assignment-production.up.railway.app/api/assessment/4a031c95-77a5-41e2-b913-a24885b80f91/report' \
+  -H 'accept: application/json'
+
+=====================================
+API ENDPOINT 6: HEALTH CHECK
+=====================================
+
+ENDPOINT: GET /health
+
+PURPOSE: Check API health status.
+
+HEADERS REQUIRED:
+- Accept: application/json
+
+SUCCESSFUL RESPONSE (200):
+{
+  "status": "healthy",
+  "timestamp": "2025-09-08T19:52:31.036671"
+}
+
+CURL EXAMPLE:
+curl -X 'GET' \
+  'https://altibbe-assignment-production.up.railway.app/health' \
+  -H 'accept: application/json'
+
+=====================================
+TRANSPARENCY ASSESSMENT QUESTIONS
+=====================================
+
+The API evaluates products across 6 key transparency dimensions:
+
+1. INGREDIENTS & COMPONENTS:
+   "Please provide detailed information about all ingredients/components used in your product. Are there any potentially harmful substances that consumers should be aware of?"
+
+2. QUALITY CONTROL & TESTING:
+   "What quality control measures and testing procedures do you implement during manufacturing? Please share your quality certifications and compliance standards."
+
+3. RISKS & SIDE EFFECTS:
+   "Are there any known side effects, risks, or contraindications associated with your product? How do you communicate these to consumers?"
+
+4. ENVIRONMENTAL IMPACT:
+   "Please describe your product's environmental impact and disposal methods. What sustainable practices do you follow in production?"
+
+5. SHELF LIFE & USAGE:
+   "What is your product's shelf life, storage requirements, and proper usage instructions? How do you ensure consumers receive accurate information?"
+
+6. COMPLAINT TRACKING:
+   "Do you have a system for tracking adverse events, consumer complaints, and product recalls? How transparent are you about product issues and their resolution?"
+
+=====================================
+SCORING SYSTEM
+=====================================
+
+Each response is scored on a scale of 0-10 based on:
+
+1. COMPLETENESS OF INFORMATION (30 points):
+   - Comprehensiveness of information provided
+   - Quantitative data and specificity
+   - Regulatory documentation and certifications
+
+2. HONESTY AND TRANSPARENCY (25 points):
+   - Acknowledgment of limitations
+   - Honest disclosure of risks
+   - Clear communication of uncertainties
+
+3. REGULATORY COMPLIANCE (20 points):
+   - Adherence to Indian regulations (BIS, FSSAI, etc.)
+   - Proper documentation and certifications
+   - Compliance with safety standards
+
+4. CONSUMER SAFETY FOCUS (15 points):
+   - Safety information prominence
+   - Risk communication effectiveness
+   - Consumer protection measures
+
+5. ACCESSIBILITY & CLARITY (10 points):
+   - Language clarity and accessibility
+   - Information availability and format
+   - User-friendly presentation
+
+=====================================
+FRONTEND IMPLEMENTATION GUIDELINES
+=====================================
+
+1. AUTHENTICATION SETUP:
+   - Assessment endpoints (/api/assessment/respond and /api/assessment/{session_id}/report) do NOT require authentication
+   - For other endpoints, first call POST /api/auth/login to get a JWT token
+   - Use any username/password combination (demo mode)
+   - Extract the "access_token" from the login response
+   - Include Authorization header: "Bearer <access_token>"
+   - Tokens expire after 30 minutes, so re-authenticate as needed
+
+2. ASSESSMENT FLOW:
+   - Start with POST /api/products/register to create a product and get session_id
+   - Use POST /api/assessment/respond to submit answers one by one
+   - Check the "is_complete" field in response to determine if assessment is done
+   - Use GET /api/assessment/{session_id}/report to get final HTML report when complete
+   - Use GET /api/assessment/{session_id}/status to check progress anytime
+
+3. ERROR HANDLING:
+   - Assessment endpoints don't return 403 authentication errors
+   - Handle 404 errors for invalid session IDs
+   - Display user-friendly error messages for 422 validation errors
+   - Implement retry logic for 500 server errors
+   - Handle 401 errors for expired JWT tokens
+
+4. RESPONSE PROCESSING:
+   - The "answer" field contains the AI's response to the user's message
+   - The "score" field contains the score for the current question (0-10)
+   - The "remaining_questions" array shows what questions are left
+   - The "all_scores" array contains scores for all completed questions
+   - Final score is the average of all question scores
+
+5. REPORT GENERATION:
+   - The "latex_report" field contains an HTML-formatted transparency report
+   - This is a complete HTML document with embedded CSS styling
+   - The report can be directly saved as an HTML file or converted to PDF
+   - The report includes detailed analysis of all responses and final scoring
+   - Report uses Deep Blue color scheme and A4 paper size optimization
+
+6. CONTEXT USAGE:
+   - The "context" object in requests helps the AI provide more relevant responses
+   - Include user_role, language, and platform information when available
+   - This helps customize the assessment experience
+
+=====================================
+TESTING CHECKLIST
+=====================================
+
+Before deploying to production, test:
+□ Login endpoint returns valid JWT token
+□ Product registration works with valid data
+□ Assessment endpoints work without authentication
+□ Assessment flow works end-to-end (all 6 questions)
+□ Status endpoint returns correct progress information
+□ Report generation works for completed assessments
+□ JWT token works for authenticated requests
+□ 401 error when JWT token is expired
+□ 404 error for invalid session IDs
+□ 422 error for malformed request bodies
+□ HTML report is properly formatted and complete
+
+=====================================
+NOTES
+=====================================
+
+- The API is currently in demo mode and accepts any username/password for login
+- Assessment endpoints (/api/assessment/respond and /api/assessment/{session_id}/report) do NOT require authentication
+- Other endpoints require JWT authentication (except login and health)
+- JWT tokens expire after 30 minutes
+- CORS is enabled for all origins
+- The assessment consists of 6 transparency questions based on Indian consumer safety guidelines
+- Each response is scored 0-10 and contributes to the final assessment score
+- The HTML report provides a comprehensive analysis of the product's transparency
+- Scoring is based on Indian regulatory standards (BIS, FSSAI, Consumer Protection Act 2019)
+- The system uses AI-powered scoring with Groq LLM integration
+- Database supports both SQLite (local) and PostgreSQL (production)

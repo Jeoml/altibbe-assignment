@@ -1,0 +1,212 @@
+API INSTRUCTIONS FOR FRONTEND AGENT
+=====================================
+
+BASE URL: https://altibbe-assignment-production.up.railway.app
+
+AUTHENTICATION:
+- Most API endpoints require JWT Bearer token authentication
+- Assessment endpoints (/api/assessment/respond and /api/assessment/{session_id}/report) do NOT require authentication
+- For other endpoints, first get a JWT token using the login endpoint
+- Then use the JWT token in Authorization header: "Bearer <jwt_token>"
+- JWT tokens expire after 30 minutes
+
+=====================================
+API ENDPOINT 0: LOGIN (GET JWT TOKEN)
+=====================================
+
+ENDPOINT: POST /api/auth/login
+
+PURPOSE: Get JWT access token for authentication.
+
+HEADERS REQUIRED:
+- Content-Type: application/x-www-form-urlencoded
+- Accept: application/json
+
+REQUEST BODY (Form Data):
+- username: string (any username works for demo)
+- password: string (any password works for demo)
+
+SUCCESSFUL RESPONSE (200):
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer"
+}
+
+CURL EXAMPLE:
+curl -X 'POST' \
+  'https://altibbe-assignment-production.up.railway.app/api/auth/login' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'username=testuser&password=testpass'
+
+=====================================
+API ENDPOINT 1: SUBMIT ASSESSMENT RESPONSE
+=====================================
+
+ENDPOINT: POST /api/assessment/respond
+
+PURPOSE: Submit a response to the current assessment question and get the next question or completion status.
+
+HEADERS REQUIRED:
+- Content-Type: application/json
+- Accept: application/json
+- NOTE: No authentication required for this endpoint
+
+REQUEST BODY SCHEMA:
+{
+  "session_id": "string (required)",
+  "message": "string (required)",
+  "context": {
+    "user_role": "string (optional)",
+    "language": "string (optional)",
+    "platform": "string (optional)"
+  }
+}
+
+REQUEST BODY EXAMPLE:
+{
+  "session_id": "4a031c95-77a5-41e2-b913-a24885b80f91",
+  "message": "Hello, I'd like to know more about your product features.",
+  "context": {
+    "user_role": "customer",
+    "language": "en",
+    "platform": "web"
+  }
+}
+
+SUCCESSFUL RESPONSE (200):
+{
+  "answer": "string",
+  "score": 0,
+  "question_number": 0,
+  "session_id": "string",
+  "is_complete": false,
+  "final_score": 0,
+  "remaining_questions": ["string"],
+  "all_scores": [0]
+}
+
+ERROR RESPONSES:
+- 422: Validation Error (invalid request body format)
+- 400: Bad Request (processing error)
+
+CURL EXAMPLE:
+curl -X 'POST' \
+  'https://altibbe-assignment-production.up.railway.app/api/assessment/respond' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "session_id": "4a031c95-77a5-41e2-b913-a24885b80f91",
+  "message": "Hello, I'\''d like to know more about your product features.",
+  "context": {
+    "user_role": "customer",
+    "language": "en",
+    "platform": "web"
+  }
+}'
+
+=====================================
+API ENDPOINT 2: GET ASSESSMENT REPORT
+=====================================
+
+ENDPOINT: GET /api/assessment/{session_id}/report
+
+PURPOSE: Get detailed assessment report with HTML summary for a completed assessment session.
+
+HEADERS REQUIRED:
+- Accept: application/json
+- NOTE: No authentication required for this endpoint
+
+PATH PARAMETERS:
+- session_id (required): The assessment session ID
+
+SUCCESSFUL RESPONSE (200):
+{
+  "session_id": "string",
+  "product_id": "string",
+  "status": "string",
+  "final_score": 0.0,
+  "detailed_responses": ["array of response objects"],
+  "scores": ["array of scores"],
+  "created_at": "timestamp",
+  "completed_at": "timestamp or null",
+  "latex_report": "string (HTML formatted report)"
+}
+
+ERROR RESPONSES:
+- 404: Session not found
+- 422: Validation Error (invalid session_id format)
+- 500: Internal server error
+
+CURL EXAMPLE:
+curl -X 'GET' \
+  'https://altibbe-assignment-production.up.railway.app/api/assessment/4a031c95-77a5-41e2-b913-a24885b80f91/report' \
+  -H 'accept: application/json'
+
+=====================================
+FRONTEND IMPLEMENTATION GUIDELINES
+=====================================
+
+1. AUTHENTICATION SETUP:
+   - Assessment endpoints (/api/assessment/respond and /api/assessment/{session_id}/report) do NOT require authentication
+   - For other endpoints, first call POST /api/auth/login to get a JWT token
+   - Use any username/password combination (demo mode)
+   - Extract the "access_token" from the login response
+   - Include Authorization header: "Bearer <access_token>"
+   - Tokens expire after 30 minutes, so re-authenticate as needed
+
+2. ERROR HANDLING:
+   - Assessment endpoints don't return 403 authentication errors
+   - Handle 404 errors for invalid session IDs
+   - Display user-friendly error messages for 422 validation errors
+   - Implement retry logic for 500 server errors
+
+3. ASSESSMENT FLOW:
+   - Start with a session_id (obtained from product registration)
+   - Use POST /api/assessment/respond to submit answers
+   - Check the "is_complete" field in response to determine if assessment is done
+   - Use GET /api/assessment/{session_id}/report to get final report when complete
+
+4. RESPONSE PROCESSING:
+   - The "answer" field contains the AI's response to the user's message
+   - The "score" field contains the score for the current question
+   - The "remaining_questions" array shows what questions are left
+   - The "all_scores" array contains scores for all completed questions
+
+5. REPORT GENERATION:
+   - The "latex_report" field contains an HTML-formatted transparency report
+   - This is a complete HTML document with embedded CSS styling
+   - The report can be directly saved as an HTML file or converted to PDF
+   - The report includes detailed analysis of all responses and final scoring
+
+6. CONTEXT USAGE:
+   - The "context" object in requests helps the AI provide more relevant responses
+   - Include user_role, language, and platform information when available
+   - This helps customize the assessment experience
+
+=====================================
+TESTING CHECKLIST
+=====================================
+
+Before deploying to production, test:
+□ Assessment endpoints work without authentication
+□ Login endpoint returns valid JWT token (for other endpoints)
+□ JWT token works for authenticated requests (for other endpoints)
+□ Valid requests return 200 with proper response structure
+□ Invalid session_id returns 404
+□ Malformed request body returns 422
+□ Assessment flow works end-to-end
+□ Report generation works for completed assessments
+
+=====================================
+NOTES
+=====================================
+
+- The API is currently in demo mode and accepts any username/password for login
+- Assessment endpoints (/api/assessment/respond and /api/assessment/{session_id}/report) do NOT require authentication
+- Other endpoints require JWT authentication (except login)
+- JWT tokens expire after 30 minutes
+- CORS is enabled for all origins
+- The assessment consists of 6 transparency questions
+- Each response is scored and contributes to the final assessment score
+- The HTML report provides a comprehensive analysis of the product's transparency
