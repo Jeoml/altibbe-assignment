@@ -130,6 +130,24 @@ def process_response(session_id: str, user_message: str, context: Dict = None) -
     finally:
         db.close()
 
+def get_session_id_by_product_id(product_id: str) -> str:
+    """Get session_id for a given product_id"""
+    db = SessionLocal()
+    try:
+        session = db.query(AssessmentSession).filter(
+            AssessmentSession.product_id == product_id
+        ).first()
+        
+        if not session:
+            raise ValueError(f"No assessment session found for product {product_id}")
+        
+        return session.session_id
+        
+    except Exception as e:
+        raise ValueError(f"Failed to get session_id: {str(e)}")
+    finally:
+        db.close()
+
 def process_multiple_responses(session_id: str, responses_list: List[str], context: Dict = None) -> Dict:
     """Process multiple user responses in sequence and return final assessment"""
     

@@ -1,0 +1,162 @@
+PRODUCT REGISTRATION API GUIDE
+==============================
+
+This guide shows you how to register a product using the Product Transparency Assessment API.
+
+BASE URL: https://altibbe-assignment-production.up.railway.app
+
+STEP-BY-STEP PROCESS:
+====================
+
+STEP 1: GET JWT TOKEN
+---------------------
+First, you need to get a JWT token for authentication.
+
+Endpoint: POST /api/auth/login
+
+Headers:
+- Content-Type: application/x-www-form-urlencoded
+- Accept: application/json
+
+Body (form data):
+- username: any username (demo mode accepts anything)
+- password: any password (demo mode accepts anything)
+
+Example using curl:
+curl -X 'POST' \
+  'https://altibbe-assignment-production.up.railway.app/api/auth/login' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'username=testuser&password=testpass'
+
+Expected Response:
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer"
+}
+
+STEP 2: REGISTER PRODUCT
+------------------------
+Use the access_token from Step 1 to register your product.
+
+Endpoint: POST /api/products/register
+
+Headers:
+- Content-Type: application/json
+- Authorization: Bearer <access_token_from_step_1>
+- Accept: application/json
+
+Body (JSON):
+{
+  "company_name": "Your Company Name",
+  "product_name": "Your Product Name",
+  "product_id": "UNIQUE-PRODUCT-ID",
+  "description": "Description of your product",
+  "domain": "product category (e.g., healthcare, food, cosmetics)"
+}
+
+Example using curl:
+curl -X 'POST' \
+  'https://altibbe-assignment-production.up.railway.app/api/products/register' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN_HERE' \
+  -d '{
+  "company_name": "TechCorp India",
+  "product_name": "HealthPlus Supplements",
+  "product_id": "HP-001",
+  "description": "Premium multivitamin supplements for adults",
+  "domain": "healthcare"
+}'
+
+Expected Response:
+{
+  "status": "success",
+  "session_id": "4a031c95-77a5-41e2-b913-a24885b80f91",
+  "product_id": "HP-001",
+  "first_question": "Please provide detailed information about all ingredients/components used in your product. Are there any potentially harmful substances that consumers should be aware of?",
+  "remaining_questions": [
+    "What quality control measures and testing procedures do you implement during manufacturing? Please share your quality certifications and compliance standards.",
+    "Are there any known side effects, risks, or contraindications associated with your product? How do you communicate these to consumers?",
+    "Please describe your product's environmental impact and disposal methods. What sustainable practices do you follow in production?",
+    "What is your product's shelf life, storage requirements, and proper usage instructions? How do you ensure consumers receive accurate information?",
+    "Do you have a system for tracking adverse events, consumer complaints, and product recalls? How transparent are you about product issues and their resolution?"
+  ],
+  "message": "Product registered. Assessment started."
+}
+
+IMPORTANT NOTES:
+================
+
+1. SAVE THE SESSION_ID: The session_id returned in the response is what you'll use for all assessment-related API calls.
+
+2. UNIQUE PRODUCT_ID: Each product_id must be unique. If you try to register a product with an existing product_id, you'll get an error.
+
+3. TOKEN EXPIRY: JWT tokens expire after 30 minutes. If you get a 401 error, you need to get a new token using Step 1.
+
+4. ASSESSMENT STARTED: Once you register a product, the assessment session is automatically created and you can start answering questions.
+
+COMPLETE EXAMPLE WITH BASH:
+===========================
+
+# Get JWT token and save it to a variable
+JWT_TOKEN=$(curl -X 'POST' \
+  'https://altibbe-assignment-production.up.railway.app/api/auth/login' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'username=testuser&password=testpass' | jq -r '.access_token')
+
+# Register product using the token
+curl -X 'POST' \
+  'https://altibbe-assignment-production.up.railway.app/api/products/register' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -d '{
+  "company_name": "TechCorp India",
+  "product_name": "HealthPlus Supplements",
+  "product_id": "HP-001",
+  "description": "Premium multivitamin supplements for adults",
+  "domain": "healthcare"
+}'
+
+ERROR HANDLING:
+===============
+
+Common errors and solutions:
+
+1. 401 Unauthorized:
+   - Your JWT token has expired
+   - Solution: Get a new token using Step 1
+
+2. 400 Bad Request - "Product with ID already exists":
+   - The product_id you're using already exists
+   - Solution: Use a different, unique product_id
+
+3. 422 Validation Error:
+   - Missing required fields in your request body
+   - Solution: Check that all required fields are included
+
+4. 401 Unauthorized - "Not authenticated":
+   - Missing or invalid Authorization header
+   - Solution: Make sure you include "Authorization: Bearer <token>"
+
+REQUIRED FIELDS:
+================
+
+Make sure your request body includes all these fields:
+- company_name (string)
+- product_name (string)
+- product_id (string, must be unique)
+- description (string)
+- domain (string)
+
+NEXT STEPS:
+===========
+
+After successfully registering a product, you can:
+1. Use the session_id to submit assessment responses
+2. Check assessment status
+3. Get the final HTML report when complete
+
+The session_id from the registration response is what you'll use for all subsequent assessment API calls.

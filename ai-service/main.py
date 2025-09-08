@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 from config import TRANSPARENCY_QUESTIONS
 from database import get_db, Product, AssessmentSession
 from schemas import ProductCreate, QuestionResponse, AssessmentResult, Token
-from services import register_product, process_response
+from services import register_product, process_response, get_session_id_by_product_id
 from auth import verify_token, create_access_token
 from report_generator import HtmlReportGenerator
 
@@ -92,6 +92,38 @@ async def register_product_endpoint(
         
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/api/products/{product_id}/session")
+async def get_product_session(
+    product_id: str,
+    token: str = Depends(verify_token),
+    db: Session = Depends(get_db)
+):
+    """Get session_id for a product by product_id"""
+    try:
+        session_id = get_session_id_by_product_id(product_id)
+        
+        # Get session details
+        session = db.query(AssessmentSession).filter(
+            AssessmentSession.session_id == session_id
+        ).first()
+        
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        return {
+            "product_id": product_id,
+            "session_id": session_id,
+            "status": session.status,
+            "current_question": session.current_question,
+            "final_score": session.final_score,
+            "created_at": session.created_at
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/assessment/respond", response_model=AssessmentResult)
 async def submit_response(
