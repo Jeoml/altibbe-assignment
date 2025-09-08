@@ -11,6 +11,7 @@ const productRoutes = require('./routes/products');
 const questionRoutes = require('./routes/questions');
 const reportRoutes = require('./routes/reports');
 const authRoutes = require('./routes/auth');
+const onboardingRoutes = require('./routes/onboarding');
 const { errorHandler } = require('./middleware/errorHandler');
 const { securityMiddleware } = require('./middleware/security');
 
@@ -151,6 +152,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/onboarding', onboardingRoutes);
 
 // Health check with security headers
 app.get('/health', (req, res) => {

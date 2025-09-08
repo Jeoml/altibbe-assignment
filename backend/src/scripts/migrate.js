@@ -66,6 +66,23 @@ const createTables = async () => {
       )
     `);
 
+    // Onboarding Sessions table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS onboarding_sessions (
+        id SERIAL PRIMARY KEY,
+        session_id VARCHAR(36) UNIQUE NOT NULL,
+        producer_id VARCHAR(36) UNIQUE NOT NULL,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        status VARCHAR(50) DEFAULT 'started',
+        message TEXT,
+        collected_fields JSONB DEFAULT '[]',
+        current_field VARCHAR(100),
+        initial_data JSONB,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+
     console.log('✅ Database tables created successfully');
   } catch (error) {
     console.error('❌ Migration error:', error);
