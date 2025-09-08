@@ -80,14 +80,27 @@ async def register_product_endpoint(
         
         db.add(session)
         db.commit()
+        db.refresh(session)  # Refresh to get the latest data from database
+        
+        # Extract session_id from database to ensure it's properly stored and retrieved
+        stored_session = db.query(AssessmentSession).filter(
+            AssessmentSession.product_id == product.product_id
+        ).first()
+        
+        if not stored_session:
+            raise HTTPException(status_code=500, detail="Failed to retrieve session from database")
+        
+        # Use the session_id extracted from database
+        extracted_session_id = stored_session.session_id
         
         return {
             "status": "success",
-            "session_id": session_id,
+            "session_id": extracted_session_id,  # Session ID extracted from database
             "product_id": product.product_id,
             "first_question": TRANSPARENCY_QUESTIONS[0],
             "remaining_questions": TRANSPARENCY_QUESTIONS[1:],  # Questions 2-6
-            "message": "Product registered. Assessment started."
+            "message": "Product registered. Assessment started.",
+            "database_verified": True  # Indicates session_id was extracted from database
         }
         
     except Exception as e:
