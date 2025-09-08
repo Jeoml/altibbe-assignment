@@ -18,8 +18,8 @@ const pool = new Pool({
   createRetryIntervalMillis: 200,
 });
 
-// Test connection with retry
-const testConnection = async (retries = 3) => {
+// Test connection with reduced retry attempts
+const testConnection = async (retries = 1) => {
   for (let i = 0; i < retries; i++) {
     try {
       console.log(`🔍 Database connection attempt ${i + 1}/${retries}`);
@@ -40,7 +40,7 @@ const testConnection = async (retries = 3) => {
   return false;
 };
 
-// Initialize with retry
+// Initialize with reduced retry
 testConnection();
 
 module.exports = {

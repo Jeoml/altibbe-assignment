@@ -144,25 +144,7 @@ app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 // Additional security middleware
 app.use(securityMiddleware);
 
-// Keep-alive ping mechanism
-const keepAlive = () => {
-  setInterval(() => {
-    // Ping database to keep connection alive (only if connected)
-    require('./config/database').query('SELECT 1')
-      .then(() => console.log('🏓 Database keepalive ping successful'))
-      .catch(err => {
-        // Don't log detailed errors for expected disconnections
-        if (err.code === 'ECONNREFUSED' || err.message.includes('timeout')) {
-          console.log('⏳ Database not available for keepalive ping');
-        } else {
-          console.error('❌ Database keepalive failed:', err.message);
-        }
-      });
-  }, 3 * 60 * 1000); // Every 3 minutes
-};
-
-// Start keepalive
-keepAlive();
+// Database keep-alive ping removed to prevent connection limit issues
 
 // Routes
 app.use('/api/products', productRoutes);
@@ -207,7 +189,6 @@ process.on('SIGINT', () => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`🔒 Security: Rate limiting, CORS, XSS protection enabled`);
-  console.log(`🏓 Keep-alive: Database ping every 3 minutes`);
   console.log(`📚 API Documentation: http://localhost:${PORT}/docs`);
 });
 

@@ -1,7 +1,7 @@
 const axios = require('axios');
 const Question = require('../models/Question');
 
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:5001';
+const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'https://altibbe-assignment-production.up.railway.app';
 
 class AIService {
   async generateQuestions(productId, productData) {
